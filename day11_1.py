@@ -12,8 +12,6 @@ for x in f:
     
 # Convert to numpy
 data = np.array(data)
-dim = len(data)
-steps = 100
     
 def do_step(data, l=10):
     cnt = 0
@@ -33,6 +31,7 @@ def do_step(data, l=10):
     data[np.where(data < 0)] = 0
     return data, cnt
 
+dim = len(data)
 steps = 100
 count = 0
 
@@ -43,9 +42,9 @@ for i in range(steps):
 print(f'There were {count} flashes after {steps} steps')
 
 count = 0
-step = 0
+step = 100
 while count < 100:
     step += 1
     data, count = do_step(data, l=dim)
 
-print(f'All octopuses flash simultaneously in step {step + 100}')
+print(f'All octopuses flash simultaneously in step {step}')
