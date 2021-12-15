@@ -1,64 +1,57 @@
 import numpy as np
+from numpy import asarray as ar
 
 # Define path
-data_path = "data/input14"
-
-# Define parameters
-part = 2
-line = 0
-insertions = {}
-
-# Set up steps
-if part == 1:
-    steps = 10
-else:
-    steps = 40
+data_path = "data/input13"
+data = []
+read_status = 1
+folds = []
+maxx = 0
+maxy = 0
 
 # Read line-by-line
 f = open(data_path, "r")
 for x in f:
-    if line == 0:
-        template = x.strip()
-    elif line > 1:
-        ins = x.strip().split(" -> ")
-        insertions[ins[0]] = ins[1]
-    line += 1   
-    
-# Identify characters, set-up counter
-chars_ins = set(insertions.values())
-chars_tem = set([c for c in template])
-chars = chars_ins.union(chars_tem)
-chars_cnt = {c:0 for c in chars}
+    if len(x.strip()) > 0:
+        if read_status == 1:
+            dot = x.strip().split(',')
+            maxx = max(maxx, int(dot[0]))
+            maxy = max(maxy, int(dot[1]))
+            data.append((int(dot[1]), int(dot[0])))
+        elif read_status == 2:
+            a = x.strip().split()[-1].split('=')
+            folds.append([a[0], int(a[1])])
+    else:
+        read_status = 2
 
-# Create empty transition matrix and state
-pairs = [c1 + c2 for c1 in chars for c2 in chars]
-trans = np.zeros((len(pairs), len(pairs)))
-state = np.zeros(len(pairs))
+# Initialize the array
+data = tuple(map(tuple, zip(*data)))
+paper = np.zeros((maxy+1, maxx+1))
+paper[data] = 1
 
-# Fill in initial state
-for i in range(len(template)-1):
-    state[pairs.index(template[i:i+2])] += 1
+def fold_paper(paper, fold):
+    '''
+    Performs a single fold
+    '''
+    if fold[0] == 'x':
+        paper1 = paper[:, :fold[1]]
+        paper2 = np.fliplr(paper[:, (fold[1]+1):])
+        paper = paper1 + paper2
+    else:
+        paper1 = paper[:fold[1], :]
+        paper2 = np.flipud(paper[(fold[1]+1):, :])
+        paper = paper1 + paper2
+    paper[paper > 1] = 1
+    return paper
+        
+# Fold once
+paper = fold_paper(paper, folds[0])
 
-# Fill in transition matrix
-for ins in insertions:
-    row = pairs.index(ins)
-    trans[row, pairs.index(ins[0] + insertions[ins])] += 1
-    trans[row, pairs.index(insertions[ins] + ins[1])] += 1
-    
-# Iterate
-for i in range(steps):
-    state = np.matmul(state, trans)
-    
-# Count characters
-for i, cnt in enumerate(state):
-    chars_cnt[pairs[i][0]] += cnt
-    chars_cnt[pairs[i][1]] += cnt
+print(f'There are {sum(sum(paper))} dots visible after the first fold')
 
-# Adjust for beginning and end
-chars_cnt[template[0]] += 1
-chars_cnt[template[-1]] += 1
+# Perform all remaining folds and print output
+for fold in folds[1:]:
+    paper = fold_paper(paper, fold)
 
-# Report outcome
-max_cnt = max(chars_cnt.values()) / 2
-min_cnt = min(chars_cnt.values()) / 2
-print(f'Result: {max_cnt - min_cnt}')
+for i in range(len(paper)):
+    print(''.join(str(int(bit)) for bit in paper[i]))
