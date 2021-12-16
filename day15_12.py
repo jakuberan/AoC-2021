@@ -14,23 +14,27 @@ for x in f:
     data.append([int(c) for c in x.strip()]) 
 data = np.array(data)
     
-def inflate_map(data):
+def inflate_map(data, factor=5):
+    """
+    Inflates the map
+    """
     # Add right
     data_add = data
-    for i in range(1, 5):
+    for i in range(1, factor):
         data_add = data_add + 1
         data_add[data_add > 9] = 1
         data = np.concatenate((data, data_add), axis=1)
         
     # Add down
     data_add = data
-    for i in range(1, 5):
+    for i in range(1, factor):
         data_add = data_add + 1
         data_add[data_add > 9] = 1
         data = np.concatenate((data, data_add), axis=0)
     
     return data
     
+# Inflate map in part 2
 if part == 2:
     data = inflate_map(data)
 
@@ -55,6 +59,9 @@ def coord_ok(data, coord):
         return True
     
 def change_order(coord, status, len_flat, len_new):
+    """
+    Reinserts the changed length and coordinate position
+    """
     idx_old = status.index(coord)
     idx_new = bisect(len_flat[:(idx_old + 1)], len_new)
 
