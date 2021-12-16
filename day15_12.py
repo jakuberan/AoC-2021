@@ -91,8 +91,8 @@ while len(status) > 0:
     
     # Search around for possible improvements
     coord_check = [
-        (coord_min[0]+1, coord_min[1]), (coord_min[0], coord_min[1]+1)
-        #(coord_min[0]-1, coord_min[1]), (coord_min[0], coord_min[1]-1)
+        (coord_min[0]+1, coord_min[1]), (coord_min[0], coord_min[1]+1),
+        (coord_min[0]-1, coord_min[1]), (coord_min[0], coord_min[1]-1)
         ]
     for coord in coord_check:
         if coord_ok(data, coord):
