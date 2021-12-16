@@ -82,6 +82,8 @@ def change_order(coord, status, len_flat, len_new):
         
 
 while len(status) > 0:
+    if len(status) % 10000 == 0:
+        print(f"{len(status)} remaining")
     
     # Identify minimum and remove from stack
     coord_val = length_flat.pop(0)
