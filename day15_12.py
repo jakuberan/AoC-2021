@@ -1,5 +1,4 @@
 import numpy as np
-from bisect import bisect
 
 # Define path
 data_path = "data/input15"
@@ -47,6 +46,45 @@ length[length == 0] = np.inf
 length[0,0] = 0
 length_flat = list(length.ravel())
 
+def swap(len_flat, status, i, j):
+    """
+    Swaps elements at selected positions
+    """
+    len_temp = len_flat[i]
+    sts_temp = status[i]
+    len_flat[i] = len_flat[j]
+    status[i] = status[j]
+    len_flat[j] = len_temp
+    status[j] = sts_temp
+    return len_flat, status
+
+def heapify(len_flat, status, i, lenght):
+    """
+    Performs heapify for a given position
+    """
+    
+    if 2*i + 1 < lenght:
+        if len_flat[i] > len_flat[2*i + 1]:
+            len_flat, status = swap(len_flat, status, i, 2*i + 1)
+            return heapify(len_flat, status, 2*i + 1, lenght)
+    if 2*i + 2 < lenght:
+        if len_flat[i] > len_flat[2*i + 2]:
+            len_flat, status = swap(len_flat, status, i, 2*i + 2)
+            return heapify(len_flat, status, 2*i + 2, lenght)
+    return len_flat, status
+
+def decrease_key(len_flat, status, i):
+    """
+    Moves lenght up in the heap
+    """
+    if i == 0:
+        return len_flat, status
+    elif len_flat[i] < len_flat[(i-1)//2]:
+        len_flat, status = swap(len_flat, status, i, (i-1)//2)
+        return decrease_key(len_flat, status, (i-1)//2)
+    else:
+        return len_flat, status
+
 def coord_ok(data, coord):
     """
     Verifies if the selected coordinate is ok
@@ -57,37 +95,17 @@ def coord_ok(data, coord):
         return False
     else:
         return True
-    
-def change_order(coord, status, len_flat, len_new):
-    """
-    Reinserts the changed length and coordinate position
-    """
-    idx_old = status.index(coord)
-    idx_new = bisect(len_flat[:(idx_old + 1)], len_new)
 
-    # Nothing changes
-    if idx_new == idx_old:
-        return status, len_flat
-    else:
-        # Remove old elements
-        status.pop(idx_old)
-        len_flat.pop(idx_old)
-        
-        # First vs. other element is added
-        if idx_new == 0:
-            return [coord] + status, [len_new] + len_flat
-        else:
-            return status[:idx_new] + [coord] + status[idx_new:], \
-                len_flat[:idx_new] + [len_new] + len_flat[idx_new:]
-        
-
-while len(status) > 0:
+while len(status) > 1:
     if len(status) % 10000 == 0:
         print(f"{len(status)} remaining")
     
-    # Identify minimum and remove from stack
-    coord_val = length_flat.pop(0)
-    coord_min = status.pop(0)
+    # Identify minimum, remove and replace by last element
+    coord_val = length_flat[0]
+    coord_min = status[0]
+    length_flat[0] = length_flat.pop()
+    status[0] = status.pop()
+    length_flat, status = heapify(length_flat, status, 0, len(length_flat))
     
     # Search around for possible improvements
     coord_check = [
@@ -99,9 +117,9 @@ while len(status) > 0:
             if coord in status:
                 if coord_val + data[coord] < length[coord]:
                     length_new = coord_val + data[coord]
+                    idx = status.index(coord)
                     length[coord] = length_new
-                    status, length_flat = change_order(
-                        coord, status, length_flat, length_new
-                        )
+                    length_flat[idx] = length_new
+                    length_flat, status = decrease_key(length_flat, status, idx)
             
 print(f"Lowest risk path has risk {length[-1, -1]}")
