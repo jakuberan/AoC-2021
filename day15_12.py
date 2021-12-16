@@ -40,6 +40,7 @@ status = [tuple(a) for a in np.transpose(np.where(length == 0))]
 # Initiate total length array
 length[length == 0] = np.inf
 length[0,0] = 0
+length_flat = list(length.ravel())
 
 def coord_ok(data, coord):
     """
@@ -51,23 +52,48 @@ def coord_ok(data, coord):
         return False
     else:
         return True
+    
+def change_order(coord, status, len_flat, len_new):
+    idx_old = status.index(coord)
+    idx_new = idx_old
+    while (idx_new > 0) and (len_flat[idx_new - 1] > len_new):
+        idx_new -= 1
+        
+    # Nothing changes
+    if idx_new == idx_old:
+        return status, len_flat
+    else:
+        # Remove old elements
+        status.pop(idx_old)
+        len_flat.pop(idx_old)
+        
+        # First vs. other element is added
+        if idx_new == 0:
+            return [coord] + status, [len_new] + len_flat
+        else:
+            return status[:idx_new] + [coord] + status[idx_new:], \
+                len_flat[:idx_new] + [len_new] + len_flat[idx_new:]
+        
 
 while len(status) > 0:
     
     # Identify minimum and remove from stack
-    all_vals = [length[crd] for crd in status]
-    coord_val = min(all_vals)
-    coord_min = status.pop(all_vals.index(coord_val))
+    coord_val = length_flat.pop(0)
+    coord_min = status.pop(0)
     
     # Search around for possible improvements
     coord_check = [
-        (coord_min[0]+1, coord_min[1]), (coord_min[0]-1, coord_min[1]),
-        (coord_min[0], coord_min[1]+1), (coord_min[0], coord_min[1]-1)
+        (coord_min[0]+1, coord_min[1]), (coord_min[0], coord_min[1]+1)
+        #(coord_min[0]-1, coord_min[1]), (coord_min[0], coord_min[1]-1)
         ]
     for coord in coord_check:
         if coord_ok(data, coord):
             if coord in status:
                 if coord_val + data[coord] < length[coord]:
-                    length[coord] = coord_val + data[coord]
+                    length_new = coord_val + data[coord]
+                    length[coord] = length_new
+                    status, length_flat = change_order(
+                        coord, status, length_flat, length_new
+                        )
             
 print(f"Lowest risk path has risk {length[-1, -1]}")
