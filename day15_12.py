@@ -1,4 +1,5 @@
 import numpy as np
+from bisect import bisect
 
 # Define path
 data_path = "data/input15"
@@ -55,10 +56,8 @@ def coord_ok(data, coord):
     
 def change_order(coord, status, len_flat, len_new):
     idx_old = status.index(coord)
-    idx_new = idx_old
-    while (idx_new > 0) and (len_flat[idx_new - 1] > len_new):
-        idx_new -= 1
-        
+    idx_new = bisect(len_flat[:(idx_old + 1)], len_new)
+
     # Nothing changes
     if idx_new == idx_old:
         return status, len_flat
