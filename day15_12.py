@@ -62,15 +62,18 @@ def heapify(len_flat, status, i, lenght):
     """
     Performs heapify for a given position
     """
-    
-    if 2*i + 1 < lenght:
-        if len_flat[i] > len_flat[2*i + 1]:
-            len_flat, status = swap(len_flat, status, i, 2*i + 1)
-            return heapify(len_flat, status, 2*i + 1, lenght)
-    if 2*i + 2 < lenght:
-        if len_flat[i] > len_flat[2*i + 2]:
-            len_flat, status = swap(len_flat, status, i, 2*i + 2)
-            return heapify(len_flat, status, 2*i + 2, lenght)
+    if 2 * i + 1 < lenght:
+        if 2 * i + 2 < lenght:
+            if len_flat[2 * i + 1] > len_flat[2 * i + 2]:
+                sml_idx = 2 * i + 2
+            else: 
+                sml_idx = 2 * i + 1
+        else:
+            sml_idx = 2 * i + 1
+        if len_flat[i] > len_flat[sml_idx]:
+            len_flat, status = swap(len_flat, status, i, sml_idx)
+            return heapify(len_flat, status, sml_idx, lenght)        
+
     return len_flat, status
 
 def decrease_key(len_flat, status, i):
@@ -103,6 +106,10 @@ while len(status) > 1:
     # Identify minimum, remove and replace by last element
     coord_val = length_flat[0]
     coord_min = status[0]
+    
+    if coord_min == (data.shape[0] - 1, data.shape[1] - 1):
+        break
+
     length_flat[0] = length_flat.pop()
     status[0] = status.pop()
     length_flat, status = heapify(length_flat, status, 0, len(length_flat))
