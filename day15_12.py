@@ -44,51 +44,47 @@ goal = nrow * ncol - 1
 data = data.flatten()
 dist = np.array([np.inf for i in range(goal+1)])
 stack = np.array([i for i in range(goal+1)])
-stack_dist = np.array([np.inf for i in range(goal+1)])
-stack_dist[0] = 0
 dist[0] = 0
 
-def swap(sdist, stack, i, j):
+def swap(stack, i, j):
     """
     Swaps elements at selected positions
     """
-    sdist_temp = sdist[i]
-    stack_temp = stack[i]
-    sdist[i] = sdist[j]
+    temp = stack[i]
     stack[i] = stack[j]
-    sdist[j] = sdist_temp
-    stack[j] = stack_temp
-    return sdist, stack
+    stack[j] = temp
+    return stack
 
-def heapify(sdist, stack, i, length):
+def heapify(stack, dist, i, length):
     """
     Performs heapify for a given position
     """
-    if 2 * i + 1 < length:
-        if 2 * i + 2 < length:
-            if sdist[2 * i + 1] > sdist[2 * i + 2]:
-                sml_idx = 2 * i + 2
-            else: 
-                sml_idx = 2 * i + 1
-        else:
-            sml_idx = 2 * i + 1
-        if sdist[i] > sdist[sml_idx]:
-            sdist, stack = swap(sdist, stack, i, sml_idx)
-            return heapify(sdist, stack, sml_idx, length)        
+    child_left = 2 * i + 1
+    child_right = 2 * i + 2
+    child_smaller = child_left
+    
+    if child_right < length:
+        if dist[stack[child_left]] > dist[stack[child_right]]:
+            child_smaller = child_right
+    if child_smaller < length:
+        if dist[stack[i]] > dist[stack[child_smaller]]:
+            stack = swap(stack, i, child_smaller)
+            return heapify(stack, dist, child_smaller, length)        
 
-    return sdist, stack
+    return stack
 
-def decrease_key(sdist, stack, i):
+def decrease_key(stack, dist, i):
     """
     Moves lenght up in the heap
     """
+    parent = (i-1)//2
     if i == 0:
-        return sdist, stack
-    elif sdist[i] < sdist[(i-1)//2]:
-        sdist, stack = swap(sdist, stack, i, (i-1)//2)
-        return decrease_key(sdist, stack, (i-1)//2)
+        return stack
+    elif dist[stack[i]] < dist[stack[parent]]:
+        stack = swap(stack, i, parent)
+        return decrease_key(stack, dist, parent)
     else:
-        return sdist, stack
+        return stack
 
 def generate_coords(coord, nrow, ncol, total):
     """
@@ -105,23 +101,21 @@ def generate_coords(coord, nrow, ncol, total):
         coords_out.append(coord + nrow)
     return coords_out
 
-while len(stack) > 1:
-    if len(stack) % 10000 == 0:
-        print(f"{len(stack)} remaining")
+stack_len = len(stack)
+while stack_len > 1:
+    if stack_len % 10000 == 0:
+        print(f"{stack_len} remaining")
     
-    # Identify minimum, remove and replace by last element
-    coord_val = stack_dist[0]
+    # Remove minimum, replace by last element and heapify
     coord_min = stack[0]
-    cur_len = len(stack) - 1
+    coord_val = dist[coord_min]
+    stack_len -= 1
+    stack[0] = stack[stack_len]
+    stack = stack[:stack_len]
+    stack = heapify(stack, dist, 0, stack_len)
     
     if coord_min == goal:
         break
-
-    stack_dist[0] = stack_dist[cur_len]
-    stack_dist = stack_dist[:cur_len]
-    stack[0] = stack[cur_len]
-    stack = stack[:cur_len]
-    stack_dist, stack = heapify(stack_dist, stack, 0, cur_len)
     
     # Search around for possible improvements
     coords = generate_coords(coord_min, nrow, ncol, goal+1)
@@ -129,9 +123,7 @@ while len(stack) > 1:
         idx = np.where(stack == coord)[0]
         if len(idx) > 0:
             if coord_val + data[coord] < dist[coord]:
-                length_new = coord_val + data[coord]
-                dist[coord] = length_new
-                stack_dist[idx[0]] = length_new
-                stack_dist, stack = decrease_key(stack_dist, stack, idx[0])
+                dist[coord] = coord_val + data[coord]
+                stack = decrease_key(stack, dist, idx[0])
             
 print(f"Lowest risk path has risk {dist[goal]}")
