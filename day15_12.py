@@ -38,95 +38,100 @@ if part == 2:
     data = inflate_map(data)
 
 # Initiate arrays
-length = np.zeros(data.shape)
-status = [tuple(a) for a in np.transpose(np.where(length == 0))]
+nrow = data.shape[0]
+ncol = data.shape[1]
+goal = nrow * ncol - 1
+data = data.flatten()
+dist = np.array([np.inf for i in range(goal+1)])
+stack = np.array([i for i in range(goal+1)])
+stack_dist = np.array([np.inf for i in range(goal+1)])
+stack_dist[0] = 0
+dist[0] = 0
 
-# Initiate total length array
-length[length == 0] = np.inf
-length[0,0] = 0
-length_flat = list(length.ravel())
-
-def swap(len_flat, status, i, j):
+def swap(sdist, stack, i, j):
     """
     Swaps elements at selected positions
     """
-    len_temp = len_flat[i]
-    sts_temp = status[i]
-    len_flat[i] = len_flat[j]
-    status[i] = status[j]
-    len_flat[j] = len_temp
-    status[j] = sts_temp
-    return len_flat, status
+    sdist_temp = sdist[i]
+    stack_temp = stack[i]
+    sdist[i] = sdist[j]
+    stack[i] = stack[j]
+    sdist[j] = sdist_temp
+    stack[j] = stack_temp
+    return sdist, stack
 
-def heapify(len_flat, status, i, lenght):
+def heapify(sdist, stack, i, length):
     """
     Performs heapify for a given position
     """
-    if 2 * i + 1 < lenght:
-        if 2 * i + 2 < lenght:
-            if len_flat[2 * i + 1] > len_flat[2 * i + 2]:
+    if 2 * i + 1 < length:
+        if 2 * i + 2 < length:
+            if sdist[2 * i + 1] > sdist[2 * i + 2]:
                 sml_idx = 2 * i + 2
             else: 
                 sml_idx = 2 * i + 1
         else:
             sml_idx = 2 * i + 1
-        if len_flat[i] > len_flat[sml_idx]:
-            len_flat, status = swap(len_flat, status, i, sml_idx)
-            return heapify(len_flat, status, sml_idx, lenght)        
+        if sdist[i] > sdist[sml_idx]:
+            sdist, stack = swap(sdist, stack, i, sml_idx)
+            return heapify(sdist, stack, sml_idx, length)        
 
-    return len_flat, status
+    return sdist, stack
 
-def decrease_key(len_flat, status, i):
+def decrease_key(sdist, stack, i):
     """
     Moves lenght up in the heap
     """
     if i == 0:
-        return len_flat, status
-    elif len_flat[i] < len_flat[(i-1)//2]:
-        len_flat, status = swap(len_flat, status, i, (i-1)//2)
-        return decrease_key(len_flat, status, (i-1)//2)
+        return sdist, stack
+    elif sdist[i] < sdist[(i-1)//2]:
+        sdist, stack = swap(sdist, stack, i, (i-1)//2)
+        return decrease_key(sdist, stack, (i-1)//2)
     else:
-        return len_flat, status
+        return sdist, stack
 
-def coord_ok(data, coord):
+def generate_coords(coord, nrow, ncol, total):
     """
-    Verifies if the selected coordinate is ok
+    Generates all coordinates around
     """
-    if (coord[0] < 0) or (coord[1] < 0):
-        return False
-    elif (coord[0] >= data.shape[0]) or (coord[1] >= data.shape[1]):
-        return False
-    else:
-        return True
+    coords_out = []
+    if coord % ncol > 0:
+        coords_out.append(coord - 1)
+    if coord % ncol < ncol - 1:
+        coords_out.append(coord + 1)
+    if coord >= nrow:
+        coords_out.append(coord - nrow)
+    if coord < total - nrow:
+        coords_out.append(coord + nrow)
+    return coords_out
 
-while len(status) > 1:
-    if len(status) % 10000 == 0:
-        print(f"{len(status)} remaining")
+while len(stack) > 1:
+    if len(stack) % 10000 == 0:
+        print(f"{len(stack)} remaining")
     
     # Identify minimum, remove and replace by last element
-    coord_val = length_flat[0]
-    coord_min = status[0]
+    coord_val = stack_dist[0]
+    coord_min = stack[0]
+    cur_len = len(stack) - 1
     
-    if coord_min == (data.shape[0] - 1, data.shape[1] - 1):
+    if coord_min == goal:
         break
 
-    length_flat[0] = length_flat.pop()
-    status[0] = status.pop()
-    length_flat, status = heapify(length_flat, status, 0, len(length_flat))
+    stack_dist[0] = stack_dist[cur_len]
+    stack_dist = stack_dist[:cur_len]
+    stack[0] = stack[cur_len]
+    stack = stack[:cur_len]
+    stack_dist, stack = heapify(stack_dist, stack, 0, cur_len)
     
     # Search around for possible improvements
-    coord_check = [
-        (coord_min[0]+1, coord_min[1]), (coord_min[0], coord_min[1]+1),
-        (coord_min[0]-1, coord_min[1]), (coord_min[0], coord_min[1]-1)
-        ]
-    for coord in coord_check:
-        if coord_ok(data, coord):
-            if coord in status:
-                if coord_val + data[coord] < length[coord]:
-                    length_new = coord_val + data[coord]
-                    idx = status.index(coord)
-                    length[coord] = length_new
-                    length_flat[idx] = length_new
-                    length_flat, status = decrease_key(length_flat, status, idx)
+    coords = generate_coords(coord_min, nrow, ncol, goal+1)
+    for coord in coords:
+        idx = np.where(stack == coord)[0]
+        if len(idx) > 0:
+            if coord_val + data[coord] < dist[coord]:
+                length_new = coord_val + data[coord]
+                dist[coord] = length_new
+                stack_dist[idx[0]] = length_new
+                stack_dist, stack = decrease_key(stack_dist, stack, idx[0])
             
-print(f"Lowest risk path has risk {length[-1, -1]}")
+print(f"Lowest risk path has risk {dist[goal]}")
