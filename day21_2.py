@@ -54,9 +54,3 @@ while sum(uni_left) > 0:
         wins = 0
     uni_wins[player] += uni_left[1 - player] * wins
     uni_left[player] = 27 * uni_left[player] - wins
-    
-
-
-
-
-

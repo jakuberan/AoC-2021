@@ -53,9 +53,3 @@ while max(score_final1, score_final2) < goal:
 score_min = min(score_final1, score_temp)
 rolled = rounds * 60 + (i - 1) * 6 + 3 * (goal <= score_final1)
 print(f'Result is {score_min * rolled}')
-
-
-
-
-
-
