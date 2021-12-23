@@ -12,5 +12,5 @@ for x in f:
         prev2 = prevs.pop(0)
         if prev2 < prevs[2]:
             cnt += 1
-    
-print(f'Increased {cnt} times')
+
+print(f"Increased {cnt} times")

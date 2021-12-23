@@ -7,7 +7,8 @@ heightmap = []
 f = open(data_path, "r")
 for x in f:
     heightmap.append([int(h) for h in x.strip()])
-    
+
+
 def is_lowest(heightmap, i, j):
     height = heightmap[i][j]
     if (j > 0) and (heightmap[i][j - 1] <= height):
@@ -20,12 +21,13 @@ def is_lowest(heightmap, i, j):
         return False
     return True
 
+
 risk = 0
 
 for i in range(len(heightmap)):
     for j in range(len(heightmap[i])):
         if is_lowest(heightmap, i, j):
-            #print(i, j, heightmap[i][j])
+            # print(i, j, heightmap[i][j])
             risk += heightmap[i][j] + 1
-    
-print(f'Total risk is {risk}')
+
+print(f"Total risk is {risk}")

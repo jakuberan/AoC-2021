@@ -6,8 +6,8 @@ data_path = "data/input17"
 # Read line-by-line
 f = open(data_path, "r")
 for x in f:
-    target = x.strip().split('=')[1:]
-    target = [a.replace(', y', '').split('..') for a in target]
+    target = x.strip().split("=")[1:]
+    target = [a.replace(", y", "").split("..") for a in target]
     target = [[int(x) for x in target[0]], [int(y) for y in target[1]]]
 
 # Loop through all eligible rnages
@@ -15,7 +15,7 @@ cnt = 0
 height = 0
 for y_start in range(-target[1][0], target[1][0] - 1, -1):
     for x_start in range(target[0][1], 0, -1):
-        y_step = - y_start - 1
+        y_step = -y_start - 1
         y = 0
         run = True
         if x_start >= 2 * y_start + 1:
@@ -36,7 +36,6 @@ for y_start in range(-target[1][0], target[1][0] - 1, -1):
             y_step -= 1
             if x_step == 0 and x < target[0][0]:
                 run = False
-    
-print(f'Best probe reaches height {height}')
-print(f'There are {cnt} probes able to hit the target')
 
+print(f"Best probe reaches height {height}")
+print(f"There are {cnt} probes able to hit the target")

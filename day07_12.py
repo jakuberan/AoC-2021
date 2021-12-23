@@ -8,7 +8,7 @@ part = 2
 # Read line-by-line
 f = open(data_path, "r")
 for x in f:
-    crabs = [int(a) for a in x.strip().split(',')]
+    crabs = [int(a) for a in x.strip().split(",")]
 
 if part == 1:
     mid = np.median(crabs)
@@ -21,4 +21,4 @@ else:
     fuel2 = sum([(abs(a - mid2) + 1) * abs(a - mid2) / 2 for a in crabs])
     fuel = min(fuel1, fuel2)
 
-print(f'Fuel spent: {fuel}')
+print(f"Fuel spent: {fuel}")

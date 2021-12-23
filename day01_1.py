@@ -11,5 +11,5 @@ for x in f:
     if now > prev:
         cnt += 1
     prev = now
-    
-print(f'Increased {cnt} times')
+
+print(f"Increased {cnt} times")

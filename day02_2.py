@@ -10,14 +10,14 @@ aim = 0
 f = open(data_path, "r")
 for x in f:
     command = x.strip().split()
-    if command[0] == 'forward':
+    if command[0] == "forward":
         horizontal += int(command[1])
         vertical += aim * int(command[1])
-    elif command[0] == 'up':
+    elif command[0] == "up":
         aim -= int(command[1])
-    elif command[0] == 'down':
+    elif command[0] == "down":
         aim += int(command[1])
     else:
-        print(f'Unknown comand {command[0]}')
-        
+        print(f"Unknown comand {command[0]}")
+
 print(horizontal * vertical)

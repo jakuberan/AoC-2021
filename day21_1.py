@@ -8,13 +8,13 @@ pos = []
 # Read line-by-line
 f = open(data_path, "r")
 for x in f:
-    pos.append(int(x.strip().split(' ')[-1]))
-  
+    pos.append(int(x.strip().split(" ")[-1]))
+
 # Generate steps per player
 steps1 = [((i + 1) * 3 % 10) for i in range(1, 60, 6)]
-steps2 = [((i + 1) * 3 % 10) for i in range(4, 60, 6)]  
-  
-# Generate basic scores 
+steps2 = [((i + 1) * 3 % 10) for i in range(4, 60, 6)]
+
+# Generate basic scores
 def gen_score10(pos0, steps):
     # Generates base score after 10 steps
     score = []
@@ -25,6 +25,7 @@ def gen_score10(pos0, steps):
         else:
             score.append(pos0 + score[-1])
     return score
+
 
 # Scores after 10 steps
 score1 = gen_score10(pos[0], steps1)
@@ -52,4 +53,4 @@ while max(score_final1, score_final2) < goal:
 
 score_min = min(score_final1, score_temp)
 rolled = rounds * 60 + (i - 1) * 6 + 3 * (goal <= score_final1)
-print(f'Result is {score_min * rolled}')
+print(f"Result is {score_min * rolled}")

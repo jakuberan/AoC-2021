@@ -8,8 +8,9 @@ pos = []
 # Read line-by-line
 f = open(data_path, "r")
 for x in f:
-    pos.append(int(x.strip().split(' ')[-1]))
-    
+    pos.append(int(x.strip().split(" ")[-1]))
+
+
 def count_outputs(out, a, mult):
     """
     Updates output list
@@ -21,9 +22,10 @@ def count_outputs(out, a, mult):
             out[k] = mult * a[k]
     return out
 
+
 def get_steps(start, steps, score):
     """
-    Counts number of steps needed to win for a single player 
+    Counts number of steps needed to win for a single player
     """
     if score >= goal:
         return {steps: 1}
@@ -36,8 +38,9 @@ def get_steps(start, steps, score):
         out = count_outputs(out, a, options[k])
 
     return out
-   
-# Generate number of steps needed for a win     
+
+
+# Generate number of steps needed for a win
 wins_per_step = [get_steps(pos[0], 0, 0), get_steps(pos[1], 0, 0)]
 
 # Align two parts
