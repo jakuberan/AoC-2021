@@ -8,10 +8,11 @@ data = []
 # Read line-by-line
 f = open(data_path, "r")
 for x in f:
-    data.append([1 if c == '>' else 2 if c == 'v' else 0 for c in x.strip()])
-    
+    data.append([1 if c == ">" else 2 if c == "v" else 0 for c in x.strip()])
+
 data = np.array(data)
-    
+
+
 def move(data, east):
     """
     Performs move
@@ -34,11 +35,12 @@ def move(data, east):
         data_new[idx][changed] = 0
         data_new[idx_new][changed] = num
         was_change = was_change | np.any(changed)
-    
+
     if east:
         data_new = np.transpose(data_new)
-    
+
     return data_new, was_change
+
 
 was_change = True
 step = 0
@@ -47,5 +49,5 @@ while was_change:
     data, was_change_south = move(data, east=False)
     was_change = was_change_east | was_change_south
     step += 1
-    
-print(f'No move after {step} steps')
+
+print(f"No move after {step} steps")
